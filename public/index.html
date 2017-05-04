@@ -48,6 +48,7 @@ limitations under the License.
   firebase.initializeApp(config);
 </script>
   <script type="text/javascript">
+    
 
     /**
      * Handles the sign in button press.
@@ -167,9 +168,15 @@ limitations under the License.
     function initApp() {
       // Listening for auth state changes.
       // [START authstatelistener]
+
+      var message = document.getElementById('message');
+      var sendm = document.getElementById('sendm');
+
+      document.getElementById('send-message').style.visibility = 'hidden';
       firebase.auth().onAuthStateChanged(function(user) {
         // [START_EXCLUDE silent]
         document.getElementById('quickstart-verify-email').disabled = true;
+        document.getElementById('send-message').style.visibility = 'visible';
         // [END_EXCLUDE]
         if (user) {
           // User is signed in.
@@ -180,10 +187,19 @@ limitations under the License.
           var isAnonymous = user.isAnonymous;
           var uid = user.uid;
           var providerData = user.providerData;
+
+
+          // sendm gönder butonu. Click yapıldığında writeData fonksiyonu ile firebase veri gönderiyor. Ve textfield'ı siliyor.
+          sendm.addEventListener('click', function() {
+            writeData(uid,email,message.value);
+            message.value = '';
+            alert("Mesaj gönderildi");
+          });
           // [START_EXCLUDE]
           document.getElementById('quickstart-sign-in-status').textContent = 'Signed in';
           document.getElementById('quickstart-sign-in').textContent = 'Sign out';
-          document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
+          //sdocument.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
+
           if (!emailVerified) {
             document.getElementById('quickstart-verify-email').disabled = false;
           }
@@ -191,6 +207,9 @@ limitations under the License.
         } else {
           // User is signed out.
           // [START_EXCLUDE]
+          
+          document.getElementById('send-message').style.visibility = 'hidden';
+
           document.getElementById('quickstart-sign-in-status').textContent = 'Signed out';
           document.getElementById('quickstart-sign-in').textContent = 'Sign in';
           document.getElementById('quickstart-account-details').textContent = 'null';
@@ -207,6 +226,15 @@ limitations under the License.
       document.getElementById('quickstart-verify-email').addEventListener('click', sendEmailVerification, false);
       document.getElementById('quickstart-password-reset').addEventListener('click', sendPasswordReset, false);
     }
+
+    // Mesaj atma fonksiyonu, bu fonksiyon yukarıda kullanılıyor. Gerekli firebase değişikliklerini burdan yapıyosun.
+    // mesajlar'ın altında olmasını istemiyorsan ref(); olarak boş bırakırsın. Sonra set bölümünde de eklemek istediklerini key value şeklinde eklersin.
+    function writeData(DeviceId, email,message) {
+      var ms = message.value;
+      var database = firebase.database().ref('mesajlar/');
+      database.set({DeviceId:DeviceId, email: email, message:message});
+      message.value = '';
+      }
 
     window.onload = function() {
       initApp();
@@ -252,8 +280,15 @@ limitations under the License.
           <div class="quickstart-user-details-container">
             Firebase sign-in status: <span id="quickstart-sign-in-status">Unknown</span>
             <div>Firebase auth <code>currentUser</code> object value:</div>
+            
             <pre><code id="quickstart-account-details">null</code></pre>
           </div>
+
+          <!-- Mesaj atma elementleri -->
+          <div id="send-message">
+              <input class="mdl-textfield__input" style="display:inline;width:auto;" type="text" id="message" name="message" placeholder="Mesajınız">
+              <button class="mdl-button mdl-js-button mdl-button--raised" id="sendm" name="sendm">Gönder</button>
+            </div>
         </div>
       </div>
 
